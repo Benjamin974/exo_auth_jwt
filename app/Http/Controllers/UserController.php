@@ -23,11 +23,9 @@ class UserController extends Controller
                                 $restant = $user->login_fails - 1;
                                 if ($user->login_fails > 3) {
                                         log::debug('Trop de tentative, vous pourrez reessayez dans 30 secondes');
-
+                                        $user->login_fails = 0;
+                                        $user->save();
                                         return response()->json(['message' => 'trop de tentative']);
-                                        // for($i = 0; $i <= 30; $i++) {
-                                        //         echo $i;
-                                        // }
                                 } else {
                                         return response()->json(['message' => 'tentative restant: ' . (3 - $restant)]);
                                 }

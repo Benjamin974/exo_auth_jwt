@@ -37,6 +37,10 @@
             width: 100%;
         }
 
+        .hiddBtn {
+            display: none;
+        }
+
         button:hover {
             opacity: 0.8;
         }
@@ -69,7 +73,7 @@
             <label for="psw"><b>Password</b></label>
             <input type="password" placeholder="Entrer un mot de passe" id="password" name="password" required>
 
-            <button id="loginBtn">Login</button>
+            <div id="addBtn"><button id="loginBtn" class="loginBtn">Login</button></div>
             <div class="" id="message"></div>
             <div class="timer"></div>
         </div>
@@ -83,45 +87,7 @@
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js"></script>
     <script>
         $(document).ready(function() {
-            $("#loginBtn").click(function(e) {
-
-                var min = 30,
-                    sec = 0,
-                    ds = 0;
-
-                var chrono = setInterval(function() {
-
-
-                    if (min == 0) { // On stop tout si minute=0
-
-                        clearInterval(chrono);
-
-                    }
-
-
-                    if (sec == 0) { // si les seconde = 0
-
-                        min--; // on enlève 1 minute
-                        sec = 59; // on remet les seconde a 59
-
-                    }
-
-
-                    if (ds == 0) { // si les dixièmes de seconde=0
-
-                        sec--; // on enlève 1 seconde
-                        ds = 10; // on remet les dixième a 10
-
-                    } else {
-
-                        ds--; // sinon on enlève 1 dixième
-
-                    }
-
-                    $('.timer').text(min + ':' + sec + ':' + ds); // Affiche le décompte
-
-
-                }, 100); // mise a jour toute les 100 milliseconde (1s=1000 milliseconde)
+            $(".loginBtn").click(function(e) {
 
                 $.ajaxSetup({
                     headers: {
@@ -144,7 +110,49 @@
                         let msg = data.message;
                         $("#message").empty();
                         $("#message").append("<p> " + msg + "</p>")
-                        console.log(msg);
+                        if (msg == 'trop de tentative') {
+                            $("#loginBtn").addClass('hiddBtn');
+                            $("#message").empty();
+                            var min = 0,
+                                sec = 30,
+                                ds = 0;
+
+                            var chrono = setInterval(function() {
+
+
+                                if (sec == 0) { // On stop tout si minute=0
+
+                                    $("#loginBtn").removeClass('hiddBtn').width('100%');
+                                    $(".timer").remove();
+                                    clearInterval(chrono);
+
+                                }
+
+
+                                if (sec == 0) { // si les seconde = 0
+
+                                    min--; // on enlève 1 minute
+                                    sec = 59; // on remet les seconde a 59
+
+                                }
+
+
+                                if (ds == 0) { // si les dixièmes de seconde=0
+
+                                    sec--; // on enlève 1 seconde
+                                    ds = 10; // on remet les dixième a 10
+
+                                } else {
+
+                                    ds--; // sinon on enlève 1 dixième
+
+                                }
+
+                                $('.timer').text('Reessayez de vous connectez dans ' + sec + ' Seconde'); // Affiche le décompte
+
+
+                            }, 100); // mise a jour toute les 100 milliseconde (1s=1000 milliseconde)
+                        }
                     }
                 });
 
