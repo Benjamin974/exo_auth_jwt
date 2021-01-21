@@ -153,6 +153,9 @@
 
                             }, 100); // mise a jour toute les 100 milliseconde (1s=1000 milliseconde)
                         }
+                    },
+                    error: function(error) {
+                        console.log(error);
                     }
                 });
 

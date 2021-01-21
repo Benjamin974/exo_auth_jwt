@@ -18,14 +18,23 @@ class UserController extends Controller
                 try {
                         if (!$token = JWTAuth::attempt($credentials)) {
                                 $user = User::where('email', $credentials['email'])->first();
+                                if(date('H') < $user->temps && $user->temps != null) {
+                                        return response()->json(['message' => 'trop de tentativeeee'], 401);
+                                } else {
+                                        $user->temps = null;
+                                        $user->save();  
+                                }
                                 $user->login_fails = $user->login_fails + 1;
                                 $user->save();
                                 $restant = $user->login_fails - 1;
                                 if ($user->login_fails > 3) {
                                         log::debug('Trop de tentative, vous pourrez reessayez dans 30 secondes');
+                                        
+
                                         $user->login_fails = 0;
+                                        $user->temps = date('H') + 2;
                                         $user->save();
-                                        return response()->json(['message' => 'trop de tentative']);
+                                        return response()->json(['message' => 'trop de tentative'], 401);
                                 } else {
                                         return response()->json(['message' => 'tentative restant: ' . (3 - $restant)]);
                                 }
