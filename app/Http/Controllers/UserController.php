@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\Contact;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -9,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Support\Facades\log;
+use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
@@ -18,18 +20,22 @@ class UserController extends Controller
                 try {
                         if (!$token = JWTAuth::attempt($credentials)) {
                                 $user = User::where('email', $credentials['email'])->first();
-                                if(date('H') < $user->temps && $user->temps != null) {
+                                if (date('H') < $user->temps && $user->temps != null) {
                                         return response()->json(['message' => 'trop de tentativeeee'], 401);
                                 } else {
                                         $user->temps = null;
-                                        $user->save();  
+                                        $user->save();
                                 }
                                 $user->login_fails = $user->login_fails + 1;
                                 $user->save();
                                 $restant = $user->login_fails - 1;
                                 if ($user->login_fails > 3) {
-                                        log::debug('Trop de tentative, vous pourrez reessayez dans 30 secondes');
-                                        
+
+                                        log::debug('Trop de tentative, vous pourrez reessayez dans 1 heure');
+                                        Mail::to($credentials['email'])->send(new Contact([
+                                                'name' => $user['name'],
+                                                'message' => 'Trop de tentative, vous pourrez reessayez dans 1 heure'
+                                        ]));
 
                                         $user->login_fails = 0;
                                         $user->temps = date('H') + 2;
